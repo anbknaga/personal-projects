@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PEPPOL Participant Checker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            animation: fadeIn 0.5s;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">PEPPOL Participant Checker</h1>
+        
+        <form id="peppolForm">
+            <!-- Environment selector -->
+            <div class="mb-3">
+                <label for="environment" class="form-label">Environment*</label>
+                <select class="form-control" id="environment" required>
+                    <option value="sandbox">Sandbox</option>
+                    <option value="production">Production</option>
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="identifier" class="form-label">Identifier*</label>
+                <input type="text" class="form-control" id="identifier" required placeholder="Enter identifier (e.g., 123456789)">
+            </div>
+            
+            <div class="mb-3">
+                <label for="scheme" class="form-label">Scheme*</label>
+                <input type="text" class="form-control" id="scheme" required placeholder="Enter scheme (e.g., 0106)">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Check Participant</button>
+        </form>
+
+        <div id="result" style="display: none;" class="result-box"></div>
+    </div>
+
+    <script>
+        document.getElementById('peppolForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const identifier = document.getElementById('identifier').value;
+            const scheme = document.getElementById('scheme').value;
+            const environment = document.getElementById('environment').value;
+            const resultDiv = document.getElementById('result');
+
+            try {
+                const response = await fetch('/check_peppol', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `identifier=${encodeURIComponent(identifier)}&scheme=${encodeURIComponent(scheme)}&environment=${encodeURIComponent(environment)}`
+                });
+
+                const data = await response.json();
+                
+                // Reset the result div to trigger animation
+                resultDiv.style.display = 'none';
+                void resultDiv.offsetWidth; // Force a DOM reflow
+                resultDiv.style.display = 'block';
+
+                // Check if there's an error in the response
+                if (data.errors || data.code === 'NOK') {
+                    resultDiv.className = 'result-box error';
+                    resultDiv.innerHTML = `
+                        <h4>❌ Error</h4>
+                        <p>Status: Error</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } 
+                // Check if it's a successful PEPPOL participant find
+                else if (data.code === 'OK') {
+                    resultDiv.className = 'result-box success';
+                    resultDiv.innerHTML = `
+                        <h4>✅ Participant Found</h4>
+                        <p>Status: ${data.code}</p>
+                        <p>Email Capability: ${data.email ? 'Yes' : 'No'}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+                // Any other response
+                else {
+                    resultDiv.className = 'result-box error';
+                    resultDiv.innerHTML = `
+                        <h4>⚠️ Unexpected Response</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                // Reset for animation
+                resultDiv.style.display = 'none';
+                void resultDiv.offsetWidth;
+                resultDiv.style.display = 'block';
+                
+                resultDiv.className = 'result-box error';
+                resultDiv.innerHTML = `
+                    <h4>❌ Error</h4>
+                    <p>${error.message}</p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
