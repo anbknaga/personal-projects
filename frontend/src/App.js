@@ -9,6 +9,8 @@ function App() {
   const [recommendations, setRecommendations] = useState([]);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [foodImages, setFoodImages] = useState({});
 
   // Recipe database
   const recipeDatabase = [
