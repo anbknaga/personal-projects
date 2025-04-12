@@ -696,6 +696,18 @@ function App() {
                   className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105 cursor-pointer"
                   onClick={() => setSelectedRecipe(recipe)}
                 >
+                  {foodImages[recipe.id] && (
+                    <div className="h-48 overflow-hidden">
+                      <img 
+                        src={foodImages[recipe.id]} 
+                        alt={recipe.name} 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.src = `https://via.placeholder.com/300x200?text=${encodeURIComponent(recipe.name)}`;
+                        }}
+                      />
+                    </div>
+                  )}
                   <div className="p-4">
                     <div className="flex items-center justify-between mb-2">
                       <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
