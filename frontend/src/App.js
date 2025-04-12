@@ -791,7 +791,7 @@ function App() {
       {/* Footer */}
       <footer className="bg-orange-600 text-white py-4 mt-8">
         <div className="container mx-auto px-4 text-center">
-          <p>© 2025 Recipe Recommender - Discover delicious recipes for any meal</p>
+          <p>© 2025 Meal Decider - Discover delicious recipes for any meal</p>
         </div>
       </footer>
     </div>
