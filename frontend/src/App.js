@@ -430,17 +430,100 @@ function App() {
     }
   ];
 
-  // Filter recipes based on user selections
+  // Fetch food images when the app loads
   useEffect(() => {
-    if (mealType) {
+    const fetchFoodImages = async () => {
+      const imageMapping = {};
+      
+      // Categories in Foodish API
+      const categories = ['burger', 'pizza', 'pasta', 'rice', 'dessert', 'biryani', 'dosa', 'idly', 'samosa', 'paneer'];
+      
+      // Match some specific recipes with appropriate categories
+      const recipeToCategory = {
+        'Masala Chai': 'tea',
+        'Aloo Paratha': 'paratha',
+        'Idli Sambar': 'idly',
+        'Poha': 'rice',
+        'Masala Dosa': 'dosa',
+        'Samosa': 'samosa',
+        'Paneer Pakora': 'paneer',
+        'Vegetable Biryani': 'biryani',
+        'Chicken Biryani': 'biryani',
+        'Butter Chicken': 'chicken',
+        'Paneer Butter Masala': 'paneer',
+        'Pasta Primavera': 'pasta',
+        'Beef Stroganoff': 'rice',
+        'Avocado Toast': 'toast',
+      };
+      
+      // For each recipe in our database, fetch a matching image
+      for (const recipe of recipeDatabase) {
+        try {
+          // Determine the category for this recipe
+          let category = recipeToCategory[recipe.name];
+          
+          // If no specific mapping, choose a category based on keywords in name or description
+          if (!category) {
+            for (const cat of categories) {
+              if (recipe.name.toLowerCase().includes(cat) || recipe.description.toLowerCase().includes(cat)) {
+                category = cat;
+                break;
+              }
+            }
+          }
+          
+          // Default to 'rice' if no category matched
+          category = category || (recipe.dietType === 'non-veg' ? 'chicken' : 'rice');
+          
+          // API URL based on category
+          let apiUrl = 'https://foodish-api.com/api';
+          if (category) {
+            apiUrl = `https://foodish-api.com/api/images/${category}`;
+          }
+          
+          // Fetch image
+          const response = await fetch(apiUrl);
+          const data = await response.json();
+          
+          // Store the image URL
+          imageMapping[recipe.id] = data.image;
+        } catch (error) {
+          console.error(`Error fetching image for ${recipe.name}:`, error);
+          // Use a placeholder image if fetch fails
+          imageMapping[recipe.id] = `https://via.placeholder.com/300x200?text=${encodeURIComponent(recipe.name)}`;
+        }
+      }
+      
+      setFoodImages(imageMapping);
+    };
+    
+    fetchFoodImages();
+  }, []);
+
+  // Filter recipes based on user selections and search query
+  useEffect(() => {
+    if (mealType || searchQuery) {
       setIsLoading(true);
+      
       // Filter recipes based on selection
       let filtered = recipeDatabase.filter(recipe => {
-        // Match meal type
-        if (recipe.mealType !== mealType) return false;
+        // If search query is provided, filter by it
+        if (searchQuery) {
+          const query = searchQuery.toLowerCase();
+          const matchesSearch = 
+            recipe.name.toLowerCase().includes(query) || 
+            recipe.description.toLowerCase().includes(query) ||
+            recipe.cuisine.toLowerCase().includes(query) ||
+            recipe.mealType.toLowerCase().includes(query);
+          
+          if (!matchesSearch) return false;
+        }
+        
+        // If meal type is selected, filter by it
+        if (mealType && recipe.mealType !== mealType) return false;
         
         // Match diet type
-        if (recipe.dietType !== dietType) return false;
+        if (dietType && recipe.dietType !== dietType) return false;
         
         // Match time range if selected
         if (timeRange.length > 0 && !timeRange.includes(recipe.timeToMake)) return false;
@@ -448,8 +531,8 @@ function App() {
         return true;
       });
 
-      // If we have results, limit to 5 and randomize
-      if (filtered.length > 0) {
+      // If we have results and using filters (not just search), limit to 5 and randomize
+      if (filtered.length > 0 && mealType && !searchQuery) {
         // Shuffle array
         filtered = filtered.sort(() => 0.5 - Math.random());
         // Get sub-array of first 5 elements after shuffled
@@ -461,7 +544,7 @@ function App() {
     } else {
       setRecommendations([]);
     }
-  }, [mealType, dietType, timeRange]);
+  }, [mealType, dietType, timeRange, searchQuery]);
 
   // Get a new surprise dish
   const getSurpriseDish = () => {
