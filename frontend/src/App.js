@@ -570,8 +570,26 @@ function App() {
       {/* Header */}
       <header className="bg-orange-500 text-white py-6 shadow-lg">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold text-center">Flavor Finder</h1>
+          <h1 className="text-3xl font-bold text-center">Recipe Recommender</h1>
           <p className="text-center mt-2 text-orange-100">Discover delicious recipes tailored to your preferences</p>
+          
+          {/* Search Bar */}
+          <div className="max-w-md mx-auto mt-4">
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                placeholder="Search for recipes, cuisines, or ingredients..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full py-2 px-4 pr-10 rounded-full border-2 border-orange-300 focus:border-orange-400 focus:outline-none text-gray-700"
+              />
+              <div className="absolute right-3 text-orange-500">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
       </header>
 
