@@ -570,7 +570,7 @@ function App() {
       {/* Header */}
       <header className="bg-orange-500 text-white py-6 shadow-lg">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold text-center">Recipe Recommender</h1>
+          <h1 className="text-3xl font-bold text-center">Meal Decider</h1>
           <p className="text-center mt-2 text-orange-100">Discover delicious recipes tailored to your preferences</p>
           
           {/* Search Bar */}
